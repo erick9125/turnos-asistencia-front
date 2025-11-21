@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Button } from '../../../components/common/Button';
-import { Alert } from '../../../components/common/Alert';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getDevices } from '../../../api/devicesApi';
 import { useRemoteMark } from '../hooks/useRemoteMark';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -14,6 +14,15 @@ export const RemoteMarkButton = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const remoteMarkMutation = useRemoteMark();
+
+  // Obtener dispositivo lógico para marcas remotas
+  const { data: devicesData } = useQuery({
+    queryKey: ['devices', 'logical'],
+    queryFn: () => getDevices({ type: 'logical', status: 'active', per_page: 1 }),
+  });
+
+  // Obtener el primer dispositivo lógico activo, o usar un valor por defecto
+  const remoteDeviceId = devicesData?.data?.[0]?.id || 1; // Fallback a 1 si no hay dispositivo lógico
 
   // Obtener la ubicación del usuario (opcional)
   const getLocation = (): Promise<{ latitude: number; longitude: number } | undefined> => {
@@ -50,9 +59,13 @@ export const RemoteMarkButton = () => {
       // Intentar obtener ubicación
       const location = await getLocation();
 
+      // Convertir 'entry'/'exit' a 'in'/'out' según API
+      const direction: 'in' | 'out' = type === 'entry' ? 'in' : 'out';
+
       const markData = {
         worker_id: user.worker_id,
-        type,
+        device_id: remoteDeviceId, // Dispositivo lógico para marcas remotas
+        direction,
         ...(location && { latitude: location.latitude, longitude: location.longitude }),
       };
 
@@ -67,9 +80,20 @@ export const RemoteMarkButton = () => {
         setTimeout(() => setMessage(null), 3000);
       }
     } catch (error: any) {
-      // Manejar errores de la API
-      const errorMessage =
-        error?.response?.data?.message || 'Error al registrar la marca. Intenta nuevamente.';
+      // Manejar errores de la API con mensajes específicos
+      let errorMessage = 'Error al registrar la marca. Intenta nuevamente.';
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+        
+        // Mensajes específicos para errores comunes
+        if (errorMessage.includes('duplicada') || errorMessage.includes('duplicado')) {
+          errorMessage = '⚠️ Ya existe una marca duplicada para este trabajador, dirección y minuto.';
+        } else if (errorMessage.includes('inactivo') || errorMessage.includes('inactive')) {
+          errorMessage = '⚠️ El trabajador o dispositivo está inactivo. Contacta al administrador.';
+        }
+      }
+      
       setMessage({ type: 'error', text: errorMessage });
     } finally {
       setMarkType(null);

@@ -23,8 +23,10 @@ export const DevicesPage = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<DeviceCreateData>({
     name: '',
-    type: '',
+    device_key: '',
+    type: 'clock',
     area_id: 0,
+    status: 'active',
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +48,7 @@ export const DevicesPage = () => {
     try {
       await createMutation.mutateAsync(formData);
       setIsCreating(false);
-      setFormData({ name: '', type: '', area_id: 0 });
+      setFormData({ name: '', device_key: '', type: 'clock', area_id: 0, status: 'active' });
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Error al crear el dispositivo');
     }
@@ -199,12 +201,47 @@ export const DevicesPage = () => {
                   color: '#374151',
                   marginBottom: '0.5rem'
                 }}>
-                  Tipo *
+                  Device Key * (Único)
+                </label>
+                <input
+                  type="text"
+                  value={formData.device_key}
+                  onChange={(e) => setFormData({ ...formData, device_key: e.target.value })}
+                  required
+                  placeholder="Ej: DEVICE_001"
+                  style={{
+                    width: '100%',
+                    padding: '0.625rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    fontFamily: 'monospace'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#667eea';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#d1d5db';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}>
+                  Tipo
                 </label>
                 <select
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  required
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'clock' | 'logical' | 'external' })}
                   style={{
                     width: '100%',
                     padding: '0.625rem',
@@ -224,10 +261,9 @@ export const DevicesPage = () => {
                     e.target.style.boxShadow = 'none';
                   }}
                 >
-                  <option value="">Seleccione un tipo</option>
-                  <option value="clock">Reloj</option>
-                  <option value="mobile">Móvil</option>
-                  <option value="tablet">Tablet</option>
+                  <option value="clock">Reloj (clock)</option>
+                  <option value="logical">Lógico (logical)</option>
+                  <option value="external">Externo (external)</option>
                 </select>
               </div>
               <div>
@@ -339,7 +375,8 @@ export const DevicesPage = () => {
                 type="button"
                 onClick={() => {
                   setIsCreating(false);
-                  setFormData({ name: '', type: '', area_id: 0 });
+                  setFormData({ name: '', device_key: '', type: 'clock', area_id: 0, status: 'active' });
+                  setError(null);
                 }}
                 style={{
                   padding: '0.625rem 1.25rem',
@@ -416,7 +453,7 @@ export const DevicesPage = () => {
             >
               <option value="">Todos</option>
               <option value="active">Activo</option>
-              <option value="inactive">Inactivo</option>
+              <option value="disabled">Desactivado</option>
             </select>
           </div>
           <div>
@@ -454,9 +491,9 @@ export const DevicesPage = () => {
               }}
             >
               <option value="">Todos</option>
-              <option value="clock">Reloj</option>
-              <option value="mobile">Móvil</option>
-              <option value="tablet">Tablet</option>
+              <option value="clock">Reloj (clock)</option>
+              <option value="logical">Lógico (logical)</option>
+              <option value="external">Externo (external)</option>
             </select>
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>

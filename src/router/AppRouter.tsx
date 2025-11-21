@@ -16,6 +16,7 @@ import { ManagerDashboard } from '../modules/manager/pages/ManagerDashboard';
 import { ShiftsPage } from '../modules/manager/pages/ShiftsPage';
 import { DevicesPage } from '../modules/manager/pages/DevicesPage';
 import { ReportsPage } from '../modules/manager/pages/ReportsPage';
+import { ExportPage } from '../modules/manager/pages/ExportPage';
 
 // Páginas de Worker
 import { WorkerDashboard } from '../modules/worker/pages/WorkerDashboard';
@@ -87,6 +88,7 @@ export const AppRouter = () => {
                     <Route path="shifts" element={<ShiftsPage />} />
                     <Route path="devices" element={<DevicesPage />} />
                     <Route path="reports" element={<ReportsPage />} />
+                    <Route path="export" element={<ExportPage />} />
                     <Route path="*" element={<Navigate to="/manager/shifts" replace />} />
                   </Routes>
                 </DashboardLayout>

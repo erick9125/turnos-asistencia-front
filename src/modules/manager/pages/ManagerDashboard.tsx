@@ -26,6 +26,13 @@ export const ManagerDashboard = () => {
       path: '/manager/reports',
       icon: '📈',
       gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+    },
+    {
+      title: 'Exportación',
+      description: 'Gestiona la exportación de marcas para sistemas legados',
+      path: '/manager/export',
+      icon: '📤',
+      gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
     }
   ];
 

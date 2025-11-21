@@ -3,11 +3,16 @@ import type { ApiResponse, RemoteMarkData, Mark } from '../types';
 
 /**
  * Crear una marca remota (entrada o salida)
- * @param data - Datos de la marca (worker_id, type, device_id opcional, coordenadas opcionales)
+ * @param data - Datos de la marca (worker_id, device_id requerido, direction: 'in'|'out', marked_at opcional)
  * @returns Marca creada
  */
 export const createRemoteMark = async (data: RemoteMarkData): Promise<ApiResponse<Mark>> => {
-  const response = await httpClient.post<ApiResponse<Mark>>('/marks/remote', data);
+  // Si no se proporciona marked_at, usar timestamp actual
+  const markData = {
+    ...data,
+    marked_at: data.marked_at || new Date().toISOString(),
+  };
+  const response = await httpClient.post<ApiResponse<Mark>>('/marks/remote', markData);
   return response.data;
 };
 

@@ -47,14 +47,24 @@ export const UsersPage = () => {
   };
 
   const handleDelete = async (user: User) => {
-    if (!window.confirm(`¿Estás seguro de eliminar al usuario ${user.name}?`)) {
+    const confirmMessage = `¿Estás seguro de eliminar al usuario ${user.name}?\n\n` +
+      `⚠️ Advertencia: No se puede eliminar un usuario que tenga un trabajador activo asociado.`;
+    
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
     try {
       await deleteMutation.mutateAsync(user.id);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al eliminar el usuario');
+      // Mostrar mensaje de error específico del API
+      const errorMessage = err?.response?.data?.message || 'Error al eliminar el usuario';
+      setError(errorMessage);
+      
+      // Si el error menciona worker asociado, mostrarlo de forma destacada
+      if (errorMessage.includes('worker') || errorMessage.includes('trabajador')) {
+        alert(`❌ ${errorMessage}`);
+      }
     }
   };
 

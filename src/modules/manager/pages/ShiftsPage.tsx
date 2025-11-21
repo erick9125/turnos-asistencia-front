@@ -64,14 +64,24 @@ export const ShiftsPage = () => {
   };
 
   const handleDelete = async (shift: Shift) => {
-    if (!window.confirm(`¿Estás seguro de eliminar el turno del trabajador ${shift.worker?.name}?`)) {
+    const confirmMessage = `¿Estás seguro de eliminar el turno del trabajador ${shift.worker?.name}?\n\n` +
+      `⚠️ Advertencia: No se puede eliminar un turno que tenga marcas asociadas.`;
+    
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
     try {
       await deleteMutation.mutateAsync(shift.id);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al eliminar el turno');
+      // Mostrar mensaje de error específico del API
+      const errorMessage = err?.response?.data?.message || 'Error al eliminar el turno';
+      setError(errorMessage);
+      
+      // Si el error menciona marcas asociadas, mostrarlo de forma destacada
+      if (errorMessage.includes('marcas asociadas')) {
+        alert(`❌ ${errorMessage}`);
+      }
     }
   };
 
@@ -86,7 +96,14 @@ export const ShiftsPage = () => {
       setEditingShift(null);
       setError(null);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al guardar el turno');
+      // Mostrar mensaje de error específico del API
+      const errorMessage = err?.response?.data?.message || 'Error al guardar el turno';
+      setError(errorMessage);
+      
+      // Si el error menciona solapamiento, mostrarlo de forma destacada
+      if (errorMessage.includes('solapa') || errorMessage.includes('solapamiento')) {
+        alert(`⚠️ ${errorMessage}`);
+      }
     }
   };
 

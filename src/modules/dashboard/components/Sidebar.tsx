@@ -31,6 +31,7 @@ export const Sidebar = () => {
           { label: 'Turnos', path: '/manager/shifts', icon: '🕐', section: 'Manager' },
           { label: 'Dispositivos', path: '/manager/devices', icon: '📱', section: 'Manager' },
           { label: 'Reportes', path: '/manager/reports', icon: '📈', section: 'Manager' },
+          { label: 'Exportación', path: '/manager/export', icon: '📤', section: 'Manager' },
         ];
 
       case 'worker':

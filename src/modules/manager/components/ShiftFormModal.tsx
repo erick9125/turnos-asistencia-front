@@ -33,11 +33,20 @@ export const ShiftFormModal = ({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    const startAt = formData.get('start_at') as string;
+    const endAt = formData.get('end_at') as string;
+
+    // Validación: end_at debe ser mayor que start_at
+    if (new Date(endAt) <= new Date(startAt)) {
+      alert('La hora de fin debe ser mayor que la hora de inicio');
+      return;
+    }
+
     const data: ShiftCreateData = {
       worker_id: parseInt(formData.get('worker_id') as string),
       area_id: parseInt(formData.get('area_id') as string),
-      start_at: formData.get('start_at') as string,
-      end_at: formData.get('end_at') as string,
+      start_at: startAt,
+      end_at: endAt,
     };
 
     onSubmit(data);

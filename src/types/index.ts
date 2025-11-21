@@ -43,7 +43,7 @@ export interface Shift {
   area_id: number;
   start_at: string;
   end_at: string;
-  status: string;
+  status: 'planned' | 'in_progress' | 'completed' | 'inconsistent' | 'absent';
   worker?: {
     id: number;
     name: string;
@@ -54,6 +54,7 @@ export interface Shift {
   };
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null; // Soft delete
 }
 
 export interface ShiftCreateData {
@@ -75,12 +76,14 @@ export interface Worker {
 export interface Device {
   id: number;
   name: string;
-  type: string;
+  device_key: string; // Agregado según API
+  type: 'clock' | 'logical' | 'external';
   area_id: number;
-  status: 'active' | 'inactive';
+  status: 'active' | 'disabled'; // Cambiado de 'inactive' a 'disabled'
   ip_address?: string;
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null; // Soft delete
   area?: {
     id: number;
     name: string;
@@ -89,15 +92,17 @@ export interface Device {
 
 export interface DeviceCreateData {
   name: string;
-  type: string;
+  device_key: string; // Requerido según API
+  type: 'clock' | 'logical' | 'external'; // Opcional, default: 'clock'
   area_id: number;
-  ip_address?: string;
+  status?: 'active' | 'disabled'; // Opcional, default: 'active'
 }
 
 export interface RemoteMarkData {
   worker_id: number;
-  device_id?: number;
-  type: 'entry' | 'exit';
+  device_id: number; // Requerido según API
+  direction: 'in' | 'out'; // Cambiado de 'type' a 'direction' según API
+  marked_at?: string; // Opcional, si no se envía usa timestamp actual
   latitude?: number;
   longitude?: number;
 }
@@ -105,14 +110,18 @@ export interface RemoteMarkData {
 export interface Mark {
   id: number;
   worker_id: number;
-  shift_id?: number;
+  shift_id?: number | null;
   device_id: number;
-  type: 'entry' | 'exit';
+  direction: 'in' | 'out'; // Cambiado de 'type' a 'direction'
+  source_type: 'remote' | 'clock' | 'external';
   marked_at: string;
+  truncated_minute?: string; // Para validar duplicados
+  exported_at?: string | null; // Para control de exportación
   latitude?: number;
   longitude?: number;
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null; // Soft delete
 }
 
 export interface AttendanceReport {
@@ -168,9 +177,57 @@ export interface UserFilters {
 
 export interface DeviceFilters {
   area_id?: number;
-  type?: string;
-  status?: string;
+  type?: 'clock' | 'logical' | 'external';
+  status?: 'active' | 'disabled';
   page?: number;
   per_page?: number;
+}
+
+export interface ExportMarksFilters {
+  start_date?: string;
+  end_date?: string;
+  only_not_exported?: boolean;
+  page?: number;
+  per_page?: number;
+}
+
+export interface ExportStatistics {
+  total: number;
+  exported: number;
+  not_exported: number;
+  export_percentage: number;
+  date_range: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface ExportedMark {
+  id: number;
+  worker_id: number;
+  device_id: number;
+  direction: 'in' | 'out';
+  marked_at: string;
+  source: 'remote' | 'clock' | 'external';
+  area_id: number;
+  branch_id: number;
+  company_id: number;
+  holding_id: number;
+  worker_name: string;
+  worker_rut: string;
+  device_name: string;
+  device_key: string;
+  area_name: string;
+  area_code: string;
+  branch_name: string;
+  branch_code: string;
+  company_name: string;
+  company_rut: string;
+  holding_name: string;
+  shift_id: number | null;
+  shift_start_at: string | null;
+  shift_end_at: string | null;
+  shift_status: string | null;
+  exported_at: string | null;
 }
 

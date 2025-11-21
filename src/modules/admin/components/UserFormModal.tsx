@@ -28,6 +28,14 @@ export const UserFormModal = ({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
+    const password = formData.get('password') as string;
+
+    // Validación de contraseña para nuevos usuarios
+    if (!user && password && password.length < 8) {
+      alert('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
     const data: Partial<User> = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
@@ -36,8 +44,8 @@ export const UserFormModal = ({
     };
 
     // Solo incluir password si es un nuevo usuario
-    if (!user && formData.get('password')) {
-      data.password = formData.get('password') as string;
+    if (!user && password) {
+      data.password = password;
     }
 
     onSubmit(data);
@@ -70,9 +78,10 @@ export const UserFormModal = ({
             {!user && (
               <Input
                 type="password"
-                label="Contraseña"
+                label="Contraseña (mínimo 8 caracteres)"
                 name="password"
                 required={!user}
+                minLength={8}
               />
             )}
 
